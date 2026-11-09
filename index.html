@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Olivér 8 – visszajelzés</title>
+<link rel="icon" href="img/red.png">
+<link rel="stylesheet" href="fonts.css">
+<script src="config.js"></script>
+<style>
+/* Layout: a full-screen title screen, then one column (max 520px): greeting, party card, bloon questions. */
+:root {
+  --sky-top: #5ec4f7;
+  --sky-bottom: #c8efff;
+  --grass: #6cbf3f;
+  --grass-dark: #4a9a28;
+  --wood: #8a5427;
+  --wood-dark: #4e2b10;
+  --gold: #ffd23f;
+  --green: #5fc62a;
+  --green-dark: #2f7d0f;
+  --paper: #f3fbff;
+  --ink: #3b2412;
+  --display: 'HuAccents', 'Lilita One', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  --body: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: linear-gradient(var(--sky-top), var(--sky-bottom) 60%) fixed;
+  font-family: var(--body); color: var(--ink); font-size: 17px; line-height: 1.4;
+  overflow-x: hidden;
+}
+button { font: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+
+.outlined {
+  color: #fff;
+  text-shadow:
+    0 .06em 0 var(--wood-dark), .06em 0 0 var(--wood-dark), -.06em 0 0 var(--wood-dark), 0 -.06em 0 var(--wood-dark),
+    .045em .045em 0 var(--wood-dark), -.045em .045em 0 var(--wood-dark), .045em -.045em 0 var(--wood-dark), -.045em -.045em 0 var(--wood-dark),
+    0 .14em 0 var(--wood-dark);
+}
+
+/* ---------- Title screen ---------- */
+#splash {
+  position: fixed; inset: 0; z-index: 20; overflow: hidden;
+  background: linear-gradient(var(--sky-top), var(--sky-bottom) 70%);
+  display: grid; place-items: center;
+  transition: transform .6s cubic-bezier(.6,-0.2,.4,1);
+}
+#splash.gone { transform: translateY(-105%); }
+#splash .grass {
+  position: absolute; left: -10%; right: -10%; bottom: -14vh; height: 34vh;
+  background: var(--grass); border-radius: 50% 50% 0 0;
+  box-shadow: inset 0 14px 0 #8fd65f, 0 -6px 0 var(--grass-dark);
+}
+.rising { position: absolute; bottom: -20vh; width: clamp(36px, 9vw, 64px); animation: rise linear infinite; opacity: .95; }
+@keyframes rise { to { transform: translateY(-140vh) rotate(var(--r, 8deg)); } }
+
+.logo { position: relative; z-index: 2; display: grid; justify-items: center; gap: 6px; margin-top: -8vh; padding: 0 16px; }
+.logo .name { font: clamp(56px, 17vw, 110px)/1 var(--display); letter-spacing: .02em; transform: rotate(-3deg); }
+.degree { display: flex; align-items: center; justify-content: center; }
+.badge {
+  position: relative; z-index: 1; width: clamp(96px, 26vw, 140px); aspect-ratio: 1; display: grid; place-items: center;
+  background: #1f2f86;
+  clip-path: polygon(50.0% 0.0%, 66.5% 10.3%, 85.4% 14.6%, 89.7% 33.5%, 100.0% 50.0%, 89.7% 66.5%, 85.4% 85.4%, 66.5% 89.7%, 50.0% 100.0%, 33.5% 89.7%, 14.6% 85.4%, 10.3% 66.5%, 0.0% 50.0%, 10.3% 33.5%, 14.6% 14.6%, 33.5% 10.3%);
+}
+.badge span {
+  width: 79%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 38%, #e15cff, #8a16d6 55%, #5a0b9a);
+  border: 5px solid #4a6cf0; font: clamp(52px, 15vw, 80px)/1 var(--display); padding-top: 6px; --wood-dark: #2a0a4a;
+}
+.ribbon {
+  background: linear-gradient(#b941f2, #7a17c4); color: #fff;
+  font: clamp(20px, 5.5vw, 30px)/1 var(--display); letter-spacing: .03em; text-transform: uppercase;
+  padding: 12px 34px 9px 50px; margin-left: -40px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 50%, 100% 100%, 0 100%);
+  box-shadow: inset 0 4px 0 #d983ff, inset 0 -5px 0 #551090; text-shadow: 0 .08em 0 #3d0a66;
+}
+
+.big-btn {
+  border: 5px solid var(--green-dark); border-radius: 22px;
+  background: linear-gradient(#8ee04f, var(--green) 55%, #45a51b);
+  box-shadow: 0 8px 0 var(--green-dark), 0 12px 24px rgb(0 0 0 / .25);
+  color: #fff; font: clamp(40px, 12vw, 64px)/1 var(--display); letter-spacing: .04em;
+  padding: 14px 44px 10px; text-shadow: 0 .07em 0 var(--green-dark), 0 0 .08em var(--green-dark);
+  transition: transform .08s, box-shadow .08s;
+}
+.big-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--green-dark); }
+.big-btn:focus-visible, .bloon:focus-visible, .small-btn:focus-visible { outline: 4px solid #fff; outline-offset: 4px; }
+#start { margin-top: 26px; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.07); } }
+
+.splash-char { position: absolute; z-index: 1; pointer-events: none; }
+#splash .dart { left: 2vw; bottom: 3vh; width: clamp(120px, 34vw, 230px); }
+#splash .spider { right: 2vw; bottom: 4vh; width: clamp(110px, 30vw, 200px); transform: rotate(-12deg); }
+#splash .lych { right: 4vw; top: 6vh; width: clamp(110px, 30vw, 210px); animation: bob 3s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-12px) rotate(-3deg); } }
+
+#mute {
+  position: fixed; z-index: 30; top: calc(10px + env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
+  width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--wood-dark);
+  background: var(--wood); color: var(--gold); display: grid; place-items: center; box-shadow: 0 3px 0 var(--wood-dark);
+}
+#mute svg { width: 24px; height: 24px; }
+
+/* ---------- Main page ---------- */
+main {
+  max-width: 520px; margin: 0 auto;
+  padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 18px;
+}
+h1 { margin: 8px 0 0; padding-inline: 52px; font: clamp(34px, 9vw, 46px)/1.05 var(--display); text-align: center; text-wrap: balance; }  /* side padding keeps clear of the mute button */
+h2 { margin: 0; font: 26px/1.1 var(--display); color: var(--wood); text-wrap: balance; }
+.card {
+  background: var(--paper); border: 4px solid var(--wood-dark); border-radius: 18px;
+  box-shadow: 0 5px 0 var(--wood-dark); padding: 18px; display: grid; gap: 12px;
+}
+.pill {
+  justify-self: start; background: var(--gold); color: var(--wood-dark);
+  font: 14px/1 var(--display); letter-spacing: .08em; text-transform: uppercase;
+  padding: 6px 12px 4px; border-radius: 99px; border: 2px solid var(--wood-dark);
+}
+.fact { display: grid; gap: 4px; }
+.fact strong { font-size: 19px; font-weight: 800; line-height: 1.25; }
+.map { width: 100%; aspect-ratio: 4 / 3; border: 3px solid var(--wood-dark); border-radius: 12px; display: block; }
+.small-btn {
+  justify-self: start; text-decoration: none; display: inline-block;
+  border: 3px solid var(--green-dark); border-radius: 12px; background: var(--green); color: #fff;
+  font: 20px/1 var(--display); padding: 10px 16px 7px; box-shadow: 0 4px 0 var(--green-dark); text-shadow: 0 2px 0 var(--green-dark);
+}
+.small-btn.plain { border-color: var(--wood-dark); background: #fff; color: var(--wood); text-shadow: none; box-shadow: 0 4px 0 var(--wood-dark); }
+.tip { margin: 0; background: #fff6cf; border-radius: 10px; padding: 10px 12px; font-size: 16px; }
+
+/* ---------- Bloon game ---------- */
+#game { position: relative; overflow: hidden; padding-bottom: 0; }
+#question { text-align: center; }
+.field { position: relative; min-height: 300px; display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 24px 14px; padding: 6px 0 165px; }  /* the row gap is larger than the 12px bob, so bloons never overlap */
+.bloon {
+  position: relative; width: 108px; height: 136px; border: 0; padding: 0; background: none;
+  animation: in .5s ease-out both, bob 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * .08s), calc(var(--i) * -.7s);
+  -webkit-tap-highlight-color: transparent;
+}
+/* A bloon takes taps only after it has floated in. Before that, a hidden bloon of the next row sits over the first row. */
+.bloon { pointer-events: none; }
+.bloon.ready { pointer-events: auto; }
+.bloon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.bloon .label {
+  position: absolute; left: 6px; right: 6px; top: 26%; text-align: center;
+  font: 19px/1.05 var(--display); --wood-dark: #2b1a10;
+}
+.bloon.popped img, .bloon.popped .label { visibility: hidden; }
+.bloon.away { animation: away .45s ease-in forwards; }
+@keyframes in { from { transform: translateY(80px); opacity: 0; } }
+@keyframes away { to { transform: translateY(-140%); opacity: 0; } }
+.burst {
+  position: absolute; left: 50%; top: 40%; width: 120px; height: 120px; translate: -50% -50%;
+  background: #fff; animation: burst .35s ease-out forwards; pointer-events: none;
+  clip-path: polygon(50% 0, 60% 30%, 92% 12%, 72% 42%, 100% 55%, 68% 62%, 82% 96%, 52% 72%, 26% 98%, 34% 64%, 0 60%, 28% 44%, 6% 14%, 40% 30%);
+  filter: drop-shadow(0 0 2px var(--gold));
+}
+@keyframes burst { from { transform: scale(.2); } 60% { transform: scale(1.1); opacity: 1; } to { transform: scale(1.2); opacity: 0; } }
+#game:has(#thrower[hidden]) .field { min-height: 0; padding-bottom: 6px; }  /* no room for the monkey when it is hidden */
+/* Top-down in-game monkey. The sprite faces down (90°), so the script turns it by (aim - 90°). */
+#thrower { position: absolute; left: 50%; bottom: 30px; width: 86px; translate: -50% 0; transition: rotate .12s ease-out; pointer-events: none; z-index: 2; filter: drop-shadow(0 4px 3px rgb(0 0 0 / .25)); }
+#thrower.throw { animation: throw .25s ease-out; }
+@keyframes throw { 40% { scale: 1.15; } }
+.dart-fly { position: fixed; left: 0; top: 0; width: 40px; height: 12px; z-index: 40; pointer-events: none; }
+.diet { display: grid; gap: 10px; width: 100%; }
+.diet input, .diet textarea {
+  font: inherit; font-size: 18px; padding: 10px 12px; border: 3px solid var(--wood-dark); border-radius: 10px; width: 100%; resize: vertical;
+}
+.summary { margin: 0; padding-left: 20px; font-size: 18px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; }
+.contact { text-align: center; font-size: 16px; }
+.contact strong { user-select: all; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<section id="splash" aria-label="Kezdőképernyő">
+  <div class="grass"></div>
+  <div id="rising"></div>
+  <img class="splash-char lych" src="img/lych.png" alt="">
+  <img class="splash-char spider" src="img/spider-ingame.png" alt="">
+  <img class="splash-char dart" src="img/dart-monkey.png" alt="">
+  <div class="logo">
+    <div class="name outlined" data-f="child">Olivér</div>
+    <div class="degree">
+      <div class="badge"><span class="outlined" data-f="age">8</span></div>
+      <div class="ribbon">éves lesz!</div>
+    </div>
+    <button id="start" class="big-btn">JÖSSZ?</button>
+  </div>
+</section>
+
+<button id="mute" hidden aria-label="Zene ki/be">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path id="waves" d="M16.5 12a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/><path id="cross" hidden d="M15 9.4l1.4-1.4 2.1 2.1 2.1-2.1L22 9.4 19.9 11.5l2.1 2.1-1.4 1.4-2.1-2.1-2.1 2.1-1.4-1.4 2.1-2.1z"/></svg>
+</button>
+<audio id="music" loop preload="auto"></audio>
+
+<main id="main" hidden>
+  <h1 class="outlined" id="hello">Sziasztok!</h1>
+
+  <section class="card" id="game" aria-live="polite">
+    <h2 id="question">Ott lesztek a bulin?</h2>
+    <div class="field" id="field"></div>
+    <img id="thrower" src="img/dart-topdown.png" alt="">
+  </section>
+
+  <section class="card">
+    <h2>A buli</h2>
+    <div class="fact"><span class="pill">Mikor?</span><strong><span data-f="dateText"></span>, <span data-f="timeText"></span></strong></div>
+    <div class="fact"><span class="pill">Hol?</span><strong data-f="address"></strong></div>
+    <iframe class="map" id="map" title="Térkép" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <a class="small-btn" id="route" target="_blank" rel="noopener">Útvonaltervezés</a>
+    <p class="tip"><b>Tipp:</b> Javasoljuk, hogy a Tóth Ilona utca felől gyertek, mert a környező utcák elég keskenyek.</p>
+  </section>
+
+  <p class="contact">Kérdésed van? Írj vagy hívj:<br>
+    <strong data-f="phone"></strong> (WhatsApp, Viber, Telegram)<br>
+    <strong data-f="email"></strong></p>
+</main>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="dart" viewBox="0 0 40 12"><path d="M40 6 26 2v8z" fill="#c9ced6"/><rect x="8" y="4" width="19" height="4" rx="2" fill="#3b3b3b"/><path d="M0 0l10 4v4L0 12l3-6z" fill="#ffd23f"/></symbol>
+</svg>
+
+<script>
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const token = new URLSearchParams(location.search).get('g');
+
+document.querySelectorAll('[data-f]').forEach(el => { el.textContent = PARTY[el.dataset.f]; });
+$('#map').src = 'https://maps.google.com/maps?q=' + encodeURIComponent(PARTY.mapsQuery) + '&z=15&output=embed';
+$('#route').href = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=' +
+  encodeURIComponent(PARTY.mapsQuery) + '&waypoints=' + encodeURIComponent(PARTY.routeVia);
+
+// ---------- Backend ----------
+// With PARTY.apiUrl set, the Apps Script answers. Without it, test data stays in this browser.
+const api = PARTY.apiUrl ? {
+  get: () => fetch(PARTY.apiUrl + '?g=' + encodeURIComponent(token)).then(r => r.json()),
+  save: rsvp => fetch(PARTY.apiUrl, { method: 'POST', body: JSON.stringify({ action: 'rsvp', token, rsvp }) }).then(r => r.json()),
+} : {
+  get: async () => {
+    let rsvp = null;
+    try { rsvp = JSON.parse(localStorage.getItem('rsvp-' + token)); } catch {}
+    return token ? { name: 'Bence és Lili', rsvp } : { name: null };
+  },
+  save: async rsvp => {
+    try { localStorage.setItem('rsvp-' + token, JSON.stringify(rsvp)); } catch {}
+    return { ok: true };
+  },
+};
+
+// ---------- Title screen ----------
+const colors = ['red', 'blue', 'green', 'yellow', 'pink', 'rainbow'];
+for (let i = 0; i < 12; i++) {
+  const b = document.createElement('img');
+  b.className = 'rising'; b.alt = ''; b.src = `img/${colors[i % colors.length]}.png`;
+  b.style.left = (Math.random() * 92) + 'vw';
+  b.style.animationDuration = (7 + Math.random() * 6) + 's';
+  b.style.animationDelay = (-Math.random() * 12) + 's';
+  b.style.setProperty('--r', (Math.random() * 30 - 15) + 'deg');
+  $('#rising').append(b);
+}
+
+const music = $('#music');
+let guest = { name: null, rsvp: null };
+let started = false;
+const startMusic = () => music.play().then(() => { $('#mute').hidden = false; }).catch(() => {});  // no music file: stay silent
+const loading = token ? api.get().then(g => { guest = g; }).catch(() => {}) : Promise.resolve();
+
+// The backend sends the music only for a valid invite token. Locally, theme.mp3 sits next to the page.
+if (!PARTY.apiUrl) music.src = 'theme-loop.mp3';
+else loading.then(async () => {
+  if (!guest.name) return;
+  const { music: b64 } = await fetch(PARTY.apiUrl + '?music=1&g=' + encodeURIComponent(token)).then(r => r.json());
+  if (!b64) return;
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  music.src = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+  if (started) startMusic();   // the guest already tapped JÖSSZ?, so the browser allows playback now
+}).catch(() => {});
+
+$('#start').addEventListener('click', async () => {
+  started = true;
+  music.volume = .6;
+  if (music.src) startMusic();
+  await loading;
+  $('#main').hidden = false;
+  $('#splash').classList.add('gone');
+  setTimeout(() => $('#splash').remove(), 700);
+  begin();
+});
+
+$('#mute').addEventListener('click', () => {
+  music.muted = !music.muted;
+  $('#waves').toggleAttribute('hidden', music.muted);
+  $('#cross').toggleAttribute('hidden', !music.muted);
+});
+
+// ---------- Bloon questions ----------
+const field = $('#field'), thrower = $('#thrower');
+
+function ask(question, answers) {
+  $('#question').textContent = question;
+  field.replaceChildren();
+  return new Promise(resolve => {
+    answers.forEach((a, i) => {
+      const b = document.createElement('button');
+      b.className = 'bloon'; b.style.setProperty('--i', i);
+      b.innerHTML = `<img src="img/${colors[i % colors.length]}.png" alt=""><span class="label outlined"></span>`;
+      b.querySelector('.label').textContent = a.label;
+      b.setAttribute('aria-label', a.label);
+      b.addEventListener('animationend', e => { if (e.animationName === 'in') b.classList.add('ready'); });
+      b.addEventListener('click', async () => {
+        field.querySelectorAll('.bloon').forEach(x => x.disabled = true);
+        await pop(b);
+        resolve(a.value);
+      }, { once: true });
+      field.append(b);
+    });
+  });
+}
+
+async function pop(bloon) {
+  const t = bloon.getBoundingClientRect();
+  const tx = t.left + t.width / 2, ty = t.top + t.height * .4;
+  const angle = aimAt(tx, ty);
+  await sleep(140);
+  thrower.classList.remove('throw'); void thrower.offsetWidth; thrower.classList.add('throw');
+  // The flying dart starts where the monkey holds its dart: pixel (22.6, 134.1) of the 127x172 sprite,
+  // measured from the sprite centre, scaled to the shown size and turned with the monkey.
+  const m = thrower.getBoundingClientRect(), k = thrower.offsetWidth / 127, rot = turned * Math.PI / 180;
+  const dx = (22.6 - 63.5) * k, dy = (134.1 - 86) * k;
+  const hx = m.left + m.width / 2 + dx * Math.cos(rot) - dy * Math.sin(rot);
+  const hy = m.top + m.height / 2 + dx * Math.sin(rot) + dy * Math.cos(rot);
+  const flightAngle = Math.atan2(ty - hy, tx - hx) * 180 / Math.PI;
+  const dart = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  dart.setAttribute('class', 'dart-fly'); dart.innerHTML = '<use href="#dart"/>';
+  document.body.append(dart);
+  const at = (x, y) => `translate(${x - 20}px, ${y - 6}px) rotate(${flightAngle}deg)`;
+  await dart.animate([{ transform: at(hx, hy) }, { transform: at(tx, ty) }], { duration: 260, easing: 'ease-in' }).finished;
+  dart.remove();
+  bloon.classList.add('popped');
+  const burst = document.createElement('span'); burst.className = 'burst'; bloon.append(burst);
+  field.querySelectorAll('.bloon:not(.popped)').forEach(x => x.classList.add('away'));
+  await sleep(450);
+}
+
+// The monkey turns to face the mouse or finger, the way towers face bloons in the game.
+function aimAt(x, y) {
+  const m = thrower.getBoundingClientRect();
+  const angle = Math.atan2(y - (m.top + m.height / 2), x - (m.left + m.width / 2)) * 180 / Math.PI;
+  // Add only the shortest turn, so the monkey never spins the long way round across ±180°.
+  turned += ((angle - 90 - turned) % 360 + 540) % 360 - 180;
+  thrower.style.rotate = turned + 'deg';
+  return angle;
+}
+let turned = 0;
+let aimFrame = 0;
+document.addEventListener('pointermove', e => {
+  if (thrower.hidden || aimFrame) return;
+  aimFrame = requestAnimationFrame(() => { aimFrame = 0; aimAt(e.clientX, e.clientY); });
+});
+document.addEventListener('pointerdown', e => { if (!thrower.hidden) aimAt(e.clientX, e.clientY); });
+
+function card(html) {
+  $('#question').textContent = '';
+  field.innerHTML = html;
+  return field;
+}
+
+const label = r => (r.coming
+  ? `<li>Jöttök: <b>igen</b></li><li>Gyerekek: <b>${r.kids}</b>, felnőttek: <b>${r.adults}</b></li><li>Étel: <b>${r.diet ? escapeHtml(r.diet) : 'mindent megesztek'}</b></li>`
+  : `<li>Jöttök: <b>sajnos nem</b></li>`) + (r.note ? `<li>Üzenet: <b>${escapeHtml(r.note)}</b></li>` : '');
+const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function begin() {
+  $('#hello').textContent = guest.name ? `Sziasztok, ${guest.name}!` : 'Sziasztok!';
+  if (!token || !guest.name) {
+    thrower.hidden = true;
+    card(`<p>A visszajelzéshez a meghívón lévő QR-kód vagy a személyes link kell. Ha nincs meg, írj vagy hívj minket bátran!</p>`);
+    return;
+  }
+  if (guest.rsvp) return showDone(guest.rsvp, true);
+  play();
+}
+
+async function play() {
+  thrower.hidden = false;
+  const r = { coming: await ask('Ott lesztek a bulin?', [{ label: 'Ott leszünk!', value: true }, { label: 'Sajnos nem', value: false }]) };
+  if (r.coming) {
+    r.kids = await ask('Hány gyerek jön?', [1, 2, 3, 4].map(n => ({ label: String(n), value: n })));
+    r.adults = await ask('És hány felnőtt?', [0, 1, 2, 3].map(n => ({ label: String(n), value: n })));
+    const hasDiet = await ask('Van olyan étel, amit nem esztek?', [{ label: 'Nincs, mindent!', value: false }, { label: 'Igen, van', value: true }]);
+    r.diet = hasDiet ? await askText('Mit nem esztek?', 'Írd ide (például: dió, glutén, tej)', 200, false, 'nem írtatok semmit') : '';
+  }
+  const hasNote = await ask('Szeretnétek még valamit üzenni?', [{ label: 'Nincs', value: false }, { label: 'Igen, írok', value: true }]);
+  r.note = hasNote ? await askText('Mit üzentek?', 'Írjátok ide az üzeneteteket', 500, true, '') : '';
+  thrower.hidden = true;
+  $('#question').textContent = 'Így küldjük el:';
+  field.innerHTML = `<div class="diet"><ul class="summary">${label(r)}</ul><div class="row"><button class="small-btn" id="send">Elküldöm!</button><button class="small-btn plain" id="again">Újrakezdem</button></div></div>`;
+  $('#again').onclick = play;
+  $('#send').onclick = async () => {
+    $('#send').disabled = true; $('#send').textContent = 'Küldés…';
+    try {
+      const res = await api.save(r);
+      if (!res.ok) throw new Error();
+      showDone(r, false);
+    } catch {
+      $('#send').disabled = false; $('#send').textContent = 'Újra próbálom';
+      $('#question').textContent = 'Nem sikerült elküldeni. Próbáld újra, vagy írj nekünk!';
+    }
+  };
+}
+
+// A free-text step: the food answer (one line) or the message (several lines).
+function askText(question, hint, max, multiline, ifEmpty) {
+  thrower.hidden = true;
+  $('#question').textContent = question;
+  const box = multiline ? `<textarea id="free-text" rows="4" maxlength="${max}"></textarea>` : `<input id="free-text" maxlength="${max}" autocomplete="off">`;
+  field.innerHTML = `<div class="diet"><label for="free-text">${hint}</label>${box}<button class="small-btn" id="free-ok">Kész</button></div>`;
+  $('#free-text').focus();
+  return new Promise(resolve => {
+    $('#free-ok').onclick = () => { thrower.hidden = false; resolve($('#free-text').value.trim() || ifEmpty); };
+  });
+}
+
+function showDone(r, earlier) {
+  thrower.hidden = true;
+  $('#question').textContent = r.coming ? 'Szuper, találkozunk december 5-én!' : 'Kár, hogy nem tudtok jönni. Köszönjük, hogy szóltatok!';
+  field.innerHTML = `<div class="diet">${earlier ? '<p>Ezt válaszoltátok:</p>' : ''}<ul class="summary">${label(r)}</ul><button class="small-btn plain" id="change">Módosítom a választ</button></div>`;
+  $('#change').onclick = play;
+}
+</script>
+</body>
+</html>

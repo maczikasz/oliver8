@@ -1,0 +1,21 @@
+# Only the guest page goes online. Everything else stays on this computer:
+# admin.html, invite.html, the backend, the tests, .clasp.json and the music.
+# The music is copyrighted. The backend serves it only to invited guests.
+/*
+!/.gitignore
+!/index.html
+!/config.js
+!/fonts.css
+!/fonts/
+!/img/
+/img/*
+!/img/red.png
+!/img/blue.png
+!/img/green.png
+!/img/yellow.png
+!/img/pink.png
+!/img/rainbow.png
+!/img/lych.png
+!/img/spider-ingame.png
+!/img/dart-monkey.png
+!/img/dart-topdown.png
