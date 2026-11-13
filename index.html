@@ -402,7 +402,7 @@ const kidLabel = r => [...String(r.note || '').split('\n').filter(Boolean), `Kaj
 
 async function playKid() {
   thrower.hidden = false;
-  const excited = await ask('Várod már a bulit?', ['Nagyon!', 'Naná!', 'Mint a tűzijátékot!'].map(l => ({ label: l, value: l })));
+  const excited = await ask('Várod már a bulit?', ['Nagyon!', 'Naná!', 'Japppán'].map(l => ({ label: l, value: l })));
   const gift = await askText('Milyen ajándékot szeretnél?', 'Írd ide, mit szeretnél kapni', 150, false, 'meglepetés');
   const food = await askText('Mit ennél a bulin?', 'Írd ide a kedvenc kajáidat', 200, false, 'mindegy');
   const theme = await ask('Milyen legyen a buli témája?', [{ label: 'Bloons!', value: 'Bloons' }, { label: 'Más', value: '' }]);
