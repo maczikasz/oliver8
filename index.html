@@ -276,6 +276,8 @@ let guest = { name: null, rsvp: null };
 let started = false;
 const startMusic = () => music.play().then(() => { $('#mute').hidden = false; }).catch(() => {});  // no music file: stay silent
 const loading = token ? api.get().then(g => { guest = g; }).catch(() => {}) : Promise.resolve();
+// The birthday child gets no "JÖSSZ?" question on the title screen.
+loading.then(() => { if (isKid()) { $('.ribbon').textContent = 'éves leszel!'; $('#start').textContent = 'HURRÁ!'; } });
 
 // The backend sends the music only for a valid invite token. Locally, theme.mp3 sits next to the page.
 if (!PARTY.apiUrl) music.src = 'theme-loop.mp3';
