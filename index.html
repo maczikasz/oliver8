@@ -389,11 +389,34 @@ async function begin() {
     card(`<p>A visszajelzéshez a meghívón lévő QR-kód vagy a személyes link kell. Ha nincs meg, írj vagy hívj minket bátran!</p>`);
     return;
   }
+  if (isKid()) $('#hello').textContent = `Boldog szülinapot, ${guest.name}!`;
   if (guest.rsvp) return showDone(guest.rsvp, true);
   play();
 }
 
+// The birthday child gets own questions. The answers use the normal fields, so the backend needs no change:
+// the food goes in diet, and the other answers go in note, one per line.
+const isKid = () => guest.name === PARTY.child;
+const kidLabel = r => [...String(r.note || '').split('\n').filter(Boolean), `Kaja: ${r.diet || 'mindegy'}`]
+  .map(l => `<li>${escapeHtml(l)}</li>`).join('');
+
+async function playKid() {
+  thrower.hidden = false;
+  const excited = await ask('Várod már a bulit?', ['Nagyon!', 'Naná!', 'Mint a tűzijátékot!'].map(l => ({ label: l, value: l })));
+  const gift = await askText('Milyen ajándékot szeretnél?', 'Írd ide, mit szeretnél kapni', 150, false, 'meglepetés');
+  const food = await askText('Mit ennél a bulin?', 'Írd ide a kedvenc kajáidat', 200, false, 'mindegy');
+  const theme = await ask('Milyen legyen a buli témája?', [{ label: 'Bloons!', value: 'Bloons' }, { label: 'Más', value: '' }]);
+  const r = { coming: true, kids: 1, adults: 0, diet: food,
+    note: [`Várja a bulit: ${excited}`, `Ajándék: ${gift}`, `Téma: ${theme || await askText('Mi legyen a téma?', 'Írd ide a témát', 100, false, 'mindegy')}`].join('\n') };
+  thrower.hidden = true;
+  $('#question').textContent = 'Ezt küldöd el:';
+  field.innerHTML = `<div class="diet"><ul class="summary">${kidLabel(r)}</ul><div class="row"><button class="small-btn" id="send">Elküldöm!</button><button class="small-btn plain" id="again">Újrakezdem</button></div></div>`;
+  $('#again').onclick = playKid;
+  $('#send').onclick = () => send(r);
+}
+
 async function play() {
+  if (isKid()) return playKid();
   thrower.hidden = false;
   const r = { coming: await ask('Ott lesztek a bulin?', [{ label: 'Ott leszünk!', value: true }, { label: 'Sajnos nem', value: false }]) };
   if (r.coming) {
@@ -408,17 +431,19 @@ async function play() {
   $('#question').textContent = 'Így küldjük el:';
   field.innerHTML = `<div class="diet"><ul class="summary">${label(r)}</ul><div class="row"><button class="small-btn" id="send">Elküldöm!</button><button class="small-btn plain" id="again">Újrakezdem</button></div></div>`;
   $('#again').onclick = play;
-  $('#send').onclick = async () => {
-    $('#send').disabled = true; $('#send').textContent = 'Küldés…';
-    try {
-      const res = await api.save(r);
-      if (!res.ok) throw new Error();
-      showDone(r, false);
-    } catch {
-      $('#send').disabled = false; $('#send').textContent = 'Újra próbálom';
-      $('#question').textContent = 'Nem sikerült elküldeni. Próbáld újra, vagy írj nekünk!';
-    }
-  };
+  $('#send').onclick = () => send(r);
+}
+
+async function send(r) {
+  $('#send').disabled = true; $('#send').textContent = 'Küldés…';
+  try {
+    const res = await api.save(r);
+    if (!res.ok) throw new Error();
+    showDone(r, false);
+  } catch {
+    $('#send').disabled = false; $('#send').textContent = 'Újra próbálom';
+    $('#question').textContent = 'Nem sikerült elküldeni. Próbáld újra, vagy írj nekünk!';
+  }
 }
 
 // A free-text step: the food answer (one line) or the message (several lines).
@@ -435,6 +460,12 @@ function askText(question, hint, max, multiline, ifEmpty) {
 
 function showDone(r, earlier) {
   thrower.hidden = true;
+  if (isKid()) {
+    $('#question').textContent = `Köszi, ${guest.name}! Boldog 8. szülinapot, december 5-én bulizunk!`;
+    field.innerHTML = `<div class="diet">${earlier ? '<p>Ezt válaszoltad:</p>' : ''}<ul class="summary">${kidLabel(r)}</ul><button class="small-btn plain" id="change">Módosítom a választ</button></div>`;
+    $('#change').onclick = play;
+    return;
+  }
   $('#question').textContent = r.coming ? 'Szuper, találkozunk december 5-én!' : 'Kár, hogy nem tudtok jönni. Köszönjük, hogy szóltatok!';
   field.innerHTML = `<div class="diet">${earlier ? '<p>Ezt válaszoltátok:</p>' : ''}<ul class="summary">${label(r)}</ul><button class="small-btn plain" id="change">Módosítom a választ</button></div>`;
   $('#change').onclick = play;
